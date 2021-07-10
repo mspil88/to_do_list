@@ -64,8 +64,8 @@ taskSubmit.addEventListener('click', () => {
 
 sortBtn.addEventListener('click', () => {
     console.log("sort button clicked");
-    let sortedTasks = tasksContainer.sort((a,b) => a.remaining_days - b.remaining_days);
-    renderTasks(sortedTasks);
+    tasksContainer = tasksContainer.sort((a,b) => a.remaining_days - b.remaining_days);
+    renderTasks(tasksContainer);
 })
 
 ulEl.addEventListener('click', (element) => {
@@ -84,7 +84,7 @@ ulEl.addEventListener("dblclick", (element) => {
         console.log(`Task Element Object ${taskElement[1]}`);
         for(let i = 0; i < tasksContainer.length; i++){
             if((tasksContainer[i].task == taskElement[0]) && tasksContainer[i].remaining_days == taskElement[taskElement.length-1]) {
-                tasksContainer.splice(i);
+                tasksContainer.splice(i, 1);
             }
         } renderTasks(tasksContainer);
 
