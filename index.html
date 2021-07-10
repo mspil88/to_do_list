@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="src/styles.css">
+        <title>To Do List App</title>
+        <script src="https://kit.fontawesome.com/c572531a0a.js" crossorigin="anonymous"></script>
+    </head>
+    <body>
+        <nav>
+            <img
+                class="logo"
+                src="images/cloud3.png"
+                alt="clouds imgage"
+            ></img>
+        <ul class = "theme" id="theme-list">
+            <li>Day</li>
+            <li>Night</li>
+        </ul>
+        <div class="dropdown">
+            <button class="theme_hamburger" id="hamburger"> 
+                <i class = "fas fa-bars"></i>
+            </button>
+            <div class="hamburger-content">
+                <a href='#'>Day</a>
+                <a href='#'>Night</a>
+            </div>
+        </div>
+        </nav>
+        <div class="task-container">
+            <div class="add-task">
+                <!---<div class="list-title"> Add a Task</div> --->
+                <form name="task-form">
+                <input type="text" id="task-input" placeholder="Add task">
+                <input type = "date" id="task-date">
+                <input type="submit" id="task-submit" value="Add Task">
+                </form>
+                <button class="sort" id="sort-btn">Sort Tasks</button>
+            </div>
+            <div class="rendered-tasks">
+                <ul id="ul-el">
+
+                </ul>
+            </div>
+        </div>
+        <script src="src/index.js"></script>
+    </body>
+
+</html>
