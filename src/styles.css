@@ -5,6 +5,20 @@ body {
     min-width: 596px;
 }
 
+body.day {
+    background-color:  #c4dce5;
+    display: flex;
+    flex-direction: column;   
+    min-width: 596px;
+}
+
+body.night {
+    background-color:  #45247a;
+    display: flex;
+    flex-direction: column;   
+    min-width: 596px;
+}
+
 nav {
     width: 100%;
     height: 50px;
@@ -19,6 +33,21 @@ nav {
 } 
 
 .logo {
+    content: url("images/cloud3.png");
+    margin-left: 20px;
+    width: 100px;
+    height: 50px;
+}
+
+.logo.day {
+    content: url("images/cloud3.png");
+    margin-left: 20px;
+    width: 100px;
+    height: 50px;
+}
+
+.logo.night {
+    content: url("images/moon7.png");
     margin-left: 20px;
     width: 100px;
     height: 50px;
@@ -34,11 +63,15 @@ nav {
     margin-top:20px;
 }
 
-#theme-list.show {
+#hamburger-content-sel.show {
     display:flex;
     flex-direction: column;
     list-style-type: none;
     font-size: 12px;
+}
+
+select {
+    overflow: auto;
 }
 
 .theme li {
