@@ -1,38 +1,49 @@
-const hamburgerBtn = document.getElementById("hamburger");
-const navList = document.getElementById("theme-list");
-
-// hamburgerBtn.addEventListener("click", () => {
-//     console.log("clicked burger");
-//     navList.classList.toggle('show');    
-// }
-// )
-
-// let form = document.querySelector('form');
-// let data = Object.fromEntries(new FormData(form).entries())
-
-// console.log(data);
-
-// document.querySelector('form').addEventListener('submit', (input) => {
-//     const data = Object.fromEntries(new FormData(input.target).entries());
-//     console.log(data);
-// })
-
 /*TODOS:
  (1) sort list DONE
- (2) List deletion side effect
- (3) persist to local storage
- (4) night theme
- (5) improve li spacing, current solution very much a hack
+ (2) List deletion side effect DONE
+ (3) persist to local storage SEEMS TO BE DONE
+ (4) Tasks with more than one word, deletion does not work fix
+ (5) night theme
+ (6) improve li spacing, current solution very much a hack
+ (7) Update days remaining
 */ 
+
+
+const hamburgerBtn = document.getElementById("hamburger");
+const navList = document.getElementById("theme-list");
+let hamburgerClicks = -1;
+
+//const theme = document.getElementById("hamburger-content-sel");
+const theme = document.getElementById("hamburger");
+
+theme.addEventListener('click', () => {
+    const body = document.querySelector("body");
+    const logo = document.querySelector(".logo");
+    hamburgerClicks ++;    
+    if (hamburgerClicks % 2 == 0) {
+        body.classList.toggle('day');
+        logo.classList.toggle('day');        
+    } else {
+        body.classList.toggle('night');
+        logo.classList.toggle('night');        
+    }
+
+    console.log(hamburgerClicks);
+})
 
 const taskSubmit = document.getElementById('task-submit'); 
 const today = new Date();
 const ulEl = document.getElementById("ul-el");
 const sortBtn = document.getElementById("sort-btn");
 let tasksContainer = [];
+let tasksFromLocal = JSON.parse(localStorage.getItem("myTasks"));
 
-console.log(today);
+if(tasksFromLocal) {
+    tasksContainer = tasksFromLocal;
+    renderTasks(tasksContainer);
+}
 
+console.log(tasksContainer[0]);
 
 function createTask(task, date) {
     return {task: task,
@@ -54,7 +65,8 @@ taskSubmit.addEventListener('click', () => {
     }
 
     tasksContainer.push(taskObj);
-    console.log(taskObj);
+    localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+    console.log(localStorage.getItem("myTasks"));
 
     for(let i = 0; i < tasksContainer.length; i++) {
         console.log(tasksContainer[i]);
@@ -78,13 +90,33 @@ ulEl.addEventListener('click', (element) => {
 
 ulEl.addEventListener("dblclick", (element) => {
     console.log("double check");
+    //get indexof days, get everything before then trim
     if(element.target.tagName == "LI") {
         let taskElement = element.target.innerText.split(' ');
-        console.log(taskElement);
-        console.log(`Task Element Object ${taskElement[1]}`);
+        let task = '';
+        let days = 0;
+
+        for(let i = 0; i < taskElement.length; i++) {
+            if((taskElement[i] != "Days") || (taskElement[i] != "remaining:") || (!taskElement[i].isInteger())) {
+                task += taskElement[i]+' ';
+            } else if (taskElement[i].isInteger()) {
+                days = taskElement[i];
+            }
+        }
+        //console.log(taskElement);
+        console.log(task);
+        console.log(days);
         for(let i = 0; i < tasksContainer.length; i++){
             if((tasksContainer[i].task == taskElement[0]) && tasksContainer[i].remaining_days == taskElement[taskElement.length-1]) {
                 tasksContainer.splice(i, 1);
+                console.log(tasksContainer[i]);
+                //localStorage.removeItem(tasksFromLocal[i]);
+                localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+            } else if ((tasksContainer[i].task == '') || (tasksContainer[i].remaining_days == '')) {
+                tasksContainer.splice(i, 1);
+                //console.log(tasksContainer[i]);
+                //localStorage.removeItem(taskContainer[i]);
+                localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
             }
         } renderTasks(tasksContainer);
 
