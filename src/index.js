@@ -2,10 +2,13 @@
  (1) sort list DONE
  (2) List deletion side effect DONE
  (3) persist to local storage SEEMS TO BE DONE
- (4) Tasks with more than one word, deletion does not work fix
- (5) night theme
- (6) improve li spacing, current solution very much a hack
- (7) Update days remaining
+ (4) Tasks with more than one word, deletion does not work fix DONE
+ (5) night theme DONE
+ (6) improve li spacing, current solution very much a hack DONE
+ (7) Update days remaining DONE
+ (8) sort tasks unchecks if done, need to save status of task DONE
+ (9) fix line through on divs
+ (10) Theme toggle?
 */ 
 
 
@@ -47,7 +50,8 @@ console.log(tasksContainer[0]);
 
 function createTask(task, date) {
     return {task: task,
-            date: date};
+            date: date,
+            status: false};
 }
 //update remaining days, generalise remainder to function
 
@@ -56,9 +60,10 @@ taskSubmit.addEventListener('click', () => {
     console.log("task submit clicked");
     let task = document.getElementById("task-input").value;
     let task_date = new Date(document.getElementById("task-date").value);
-    let taskObj = createTask(task, task_date)
+    let taskObj = createTask(task, task_date);
 
-    taskObj.remaining_days = Math.floor((taskObj.date - today)/(1000*60*60*24));
+    taskObj.remaining_days = Math.floor((taskObj.date - today)/(1000*60*60*24))+1;
+    taskObj.clicks = 0;
 
     if(isNaN(taskObj.remaining_days)) {
         taskObj.remaining_days = '';
@@ -78,13 +83,36 @@ sortBtn.addEventListener('click', () => {
     console.log("sort button clicked");
     tasksContainer = tasksContainer.sort((a,b) => a.remaining_days - b.remaining_days);
     renderTasks(tasksContainer);
+    renderTaskStatus();
 })
+
 
 ulEl.addEventListener('click', (element) => {
     console.log("clicked list element!");
-    if(element.target.tagName == 'LI') {
+    
+    if((element.target.tagName == 'LI')) {
         element.target.classList.toggle('checked');
+
+        let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
+        let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
+        
+        for(let i = 0; i < tasksContainer.length; i++) {
+            if(tasksContainer[i].task == taskStr) {
+                tasksContainer[i].clicks +=1;
+                if(tasksContainer[i].clicks % 2 != 0) {
+                    tasksContainer[i].status = true;
+                    element.target.childNodes[1].classList.toggle('checked');
+                    element.target.childNodes[3].classList.toggle('checked');
+                }
+                else {
+                    tasksContainer[i].status = false;
+                    element.target.childNodes[1].classList = 'task';
+                    element.target.childNodes[3].classList = 'days-remaining';
+                }
+            }
+        } localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
     }
+    console.log(tasksContainer);
     
 })
 
@@ -92,22 +120,15 @@ ulEl.addEventListener("dblclick", (element) => {
     console.log("double check");
     //get indexof days, get everything before then trim
     if(element.target.tagName == "LI") {
-        let taskElement = element.target.innerText.split(' ');
-        let task = '';
-        let days = 0;
-
-        for(let i = 0; i < taskElement.length; i++) {
-            if((taskElement[i] != "Days") || (taskElement[i] != "remaining:") || (!taskElement[i].isInteger())) {
-                task += taskElement[i]+' ';
-            } else if (taskElement[i].isInteger()) {
-                days = taskElement[i];
-            }
-        }
-        //console.log(taskElement);
-        console.log(task);
+        let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
+        let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
+        let days = taskElement[taskElement.length-1];
+        
+        console.log(taskElement);
+        console.log(`taskStr: ${taskStr}`);
         console.log(days);
         for(let i = 0; i < tasksContainer.length; i++){
-            if((tasksContainer[i].task == taskElement[0]) && tasksContainer[i].remaining_days == taskElement[taskElement.length-1]) {
+            if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == days) {
                 tasksContainer.splice(i, 1);
                 console.log(tasksContainer[i]);
                 //localStorage.removeItem(tasksFromLocal[i]);
@@ -123,23 +144,60 @@ ulEl.addEventListener("dblclick", (element) => {
     }
 })
 
-//render out list using JS with tasks
 function renderTasks(taskArray) {
     console.log("calling renderTasks()");
 
     let listItems = '';
+    
     for(let i = 0; i < tasksContainer.length; i++) {
         listItems += 
-            `<li>
-                ${tasksContainer[i].task} &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
-                &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-                &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-                &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp
-                &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp 
-                &nbsp &nbsp &nbsp 
-                Days remaining: ${tasksContainer[i].remaining_days}
+            `<li class="li-tasks" id="task-list-elem">
+                    <div class="task" id="task-div"> ${tasksContainer[i].task} </div> 
+                    <div class="days-remaining" id="days-div"> Days Remaining: ${tasksContainer[i].remaining_days} </div>
             </li>`;
+
     }
     ulEl.innerHTML = listItems;
 }
 
+window.addEventListener('DOMContentLoaded', () => {
+    console.log("DOM CONTENT LOADED");
+    console.log(today);
+
+    for(let i in tasksContainer) {
+        tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
+    }
+
+    localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+    //element.target.childNodes[3].classList.toggle('checked');
+    
+    // console.log(taskLi.childNodes[3].childNodes[3].classList);
+    // console.log(taskLi.children);
+    renderTaskStatus();
+
+}
+)
+    
+function renderTaskStatus() {
+    const taskLi = document.getElementById("ul-el");
+    for(let i in tasksContainer) {
+        if(tasksContainer[i].status == true) {
+     
+            for(let j in taskLi.childNodes) {
+                try {
+                    let text = taskLi.childNodes[j].childNodes[1].textContent.trim();
+                    console.log(text.length);  
+                    if(text === tasksContainer[i].task) {
+                        taskLi.childNodes[j].classList.toggle('checked');
+                        
+                    }
+                }
+            
+                 catch(e) {
+                    console.log(e)
+                 }
+    }
+
+    }
+}
+}
