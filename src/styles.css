@@ -13,7 +13,7 @@ body.day {
 }
 
 body.night {
-    background-color:  #45247a;
+    background-color:black;
     display: flex;
     flex-direction: column;   
     min-width: 596px;
@@ -47,7 +47,7 @@ nav {
 }
 
 .logo.night {
-    content: url("images/moon7.png");
+    content: url("images/moon10.jpg");
     margin-left: 20px;
     width: 100px;
     height: 50px;
@@ -182,12 +182,53 @@ ul li {
 ul li.checked {
     background-color: darkblue;
     color: white;
+    text-decoration-line: line-through;
+}
+
+.task {
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+.task.checked {
+    padding-left: 10px;
     text-decoration: line-through;
+    
+}
+
+.days-remaining {
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+.days-remaining.checked {
+    padding-left: 10px;
+    text-decoration: line-through;
+    
 }
 
 ul li:hover{
     background-color: lightblue;
 }
+
+li {
+    display: flex;
+
+}
+
+li .task {
+    position: fixed;
+    padding-left: 10px;
+}
+
+
+.days-remaining {
+    position: fixed;
+    margin-left: 410px;
+    padding-right: 10px;
+    
+}
+
 
 .li-task-date-div {
     text-align: right;
