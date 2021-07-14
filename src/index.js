@@ -7,8 +7,9 @@
  (6) improve li spacing, current solution very much a hack DONE
  (7) Update days remaining DONE
  (8) sort tasks unchecks if done, need to save status of task DONE
- (9) fix line through on divs
+ (9) fix line through on divs DONE
  (10) Theme toggle?
+ (11) duplicate name potential delete issue - add num days into deletion
 */ 
 
 
@@ -165,7 +166,11 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log(today);
 
     for(let i in tasksContainer) {
-        tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
+        if(tasksContainer[i].date == null) {
+            tasksContainer[i].remaining_days = '';
+        } else {
+            tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
+        }
     }
 
     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
@@ -186,10 +191,11 @@ function renderTaskStatus() {
             for(let j in taskLi.childNodes) {
                 try {
                     let text = taskLi.childNodes[j].childNodes[1].textContent.trim();
-                    console.log(text.length);  
                     if(text === tasksContainer[i].task) {
                         taskLi.childNodes[j].classList.toggle('checked');
-                        
+                        let cn = taskLi.childNodes[j].childNodes;
+                        cn[1].classList.toggle('checked');
+                        cn[3].classList.toggle('checked');
                     }
                 }
             
