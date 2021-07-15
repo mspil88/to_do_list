@@ -264,3 +264,17 @@ li .task {
     text-align: right;
     width: 500px;
     height: -20px;}
+
+
+
+#task-div {
+    position: absolute;
+    white-space: nowrap;
+    
+}
+
+#days-div {
+    position: absolute;
+    white-space: nowrap;
+    
+}
