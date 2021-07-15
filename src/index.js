@@ -9,7 +9,7 @@
  (8) sort tasks unchecks if done, need to save status of task DONE
  (9) fix line through on divs DONE
  (10) Theme toggle?
- (11) duplicate name potential delete issue - add num days into deletion
+ (11) duplicate name potential delete issue - add num days into deletion DONE
 */ 
 
 
@@ -97,13 +97,18 @@ ulEl.addEventListener('click', (element) => {
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
         let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
         let taskDays = taskElement[taskElement.length-1];
+        if(taskDays == "Remaining:") {
+            taskDays = '';
+        }
         console.log("taskstrrrr");
-        console.log(taskElement);
+        console.log(taskStr);
         console.log(taskDays);
+
         
         for(let i = 0; i < tasksContainer.length; i++) {
             if((tasksContainer[i].task == taskStr) && (tasksContainer[i].remaining_days == taskDays)) {
                 tasksContainer[i].clicks +=1;
+                console.log("match");
                 if(tasksContainer[i].clicks % 2 != 0) {
                     tasksContainer[i].status = true;
                     element.target.childNodes[1].classList.toggle('checked');
@@ -127,28 +132,32 @@ ulEl.addEventListener("dblclick", (element) => {
     if(element.target.tagName == "LI") {
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
         let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
-        let days = taskElement[taskElement.length-1];
+        let taskDays = taskElement[taskElement.length-1];
+        if(taskDays == "Remaining:") {
+            taskDays = '';
+        }
         
         console.log(taskElement);
         console.log(`taskStr: ${taskStr}`);
-        console.log(days);
+        console.log(taskDays);
         for(let i = 0; i < tasksContainer.length; i++){
-            if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == days) {
+            if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == taskDays) {
                 tasksContainer.splice(i, 1);
-                console.log(tasksContainer[i]);
+                console.log(`taskcontainer ${tasksContainer.task}`);
                 //localStorage.removeItem(tasksFromLocal[i]);
                 localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            } else if ((tasksContainer[i].task == '') || (tasksContainer[i].remaining_days == '')) {
-                tasksContainer.splice(i, 1);
-                //console.log(tasksContainer[i]);
-                //localStorage.removeItem(taskContainer[i]);
-                localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            }
+            // } else if ((tasksContainer[i].task == '') || (tasksContainer[i].remaining_days == taskDays)) {
+            //     tasksContainer.splice(i, 1);
+            //     console.log(`deleting ${tasksContainer[i].task}`);
+            //     //console.log(tasksContainer[i]);
+            //     //localStorage.removeItem(taskContainer[i]);
+            //     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+            // }
         } 
         renderTasks(tasksContainer);
         renderTaskStatus();
-    }
-})
+    }}}
+)
 
 function renderTasks(taskArray) {
     console.log("calling renderTasks()");
