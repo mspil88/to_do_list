@@ -13,10 +13,15 @@ body.day {
 }
 
 body.night {
-    background-color:  #45247a;
+    background-color:black;
     display: flex;
     flex-direction: column;   
     min-width: 596px;
+}
+
+
+#hamburger:active {
+    border: 0.2px solid white;
 }
 
 nav {
@@ -47,7 +52,7 @@ nav {
 }
 
 .logo.night {
-    content: url("images/moon7.png");
+    content: url("images/moon10.jpg");
     margin-left: 20px;
     width: 100px;
     height: 50px;
@@ -123,11 +128,27 @@ select {
     background-color: white;
 }
 
+#task-input, #task-date, #task-submit, #sort-btn {
+    box-shadow: 0 2px 5px #193047;
+}
+
+#task-input:hover, #task-date:hover, #task-submit:hover, #sort-btn:hover {
+    background: #fff;
+    box-shadow: 2px 2px 3px 2px #1abc9c;
+    color: #000;
+}
+
+#task-submit:active, #sort-btn:active {
+    background-color: black;
+    color: white;
+} 
+
 #task-input {
     height: 30px;
     width: 260px;
     padding: 0 0 0 10px;
     text-align: left;
+
 }
 
 #task-date {
@@ -146,14 +167,19 @@ select {
     height: 32px;
 }
 
-#task-submit:hover, #sort-btn:hover {
-    background-color: lightblue;
-}
+#task-submit, #sort-btn {
+    transition-duration: 0.4s;
+    overflow: hidden;
+} 
 
-#task-submit:active, #sort-btn:active {
+/*#task-submit:hover, #sort-btn:hover {
+    background-color: lightblue;
+}*/
+
+/*#task-submit:active, #sort-btn:active {
     background-color: rgb(118, 118, 196);
     color: white;
-}
+}*/
 
 .rendered-tasks {
     display: flex;
@@ -177,17 +203,62 @@ ul li {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     font-size: 15px;
     border-radius: 5px;
+    box-shadow: 0 2px 5px #193047;
 }
 
 ul li.checked {
     background-color: darkblue;
     color: white;
+    text-decoration-line: line-through;
+}
+
+.task {
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+.task.checked {
+    padding-left: 10px;
     text-decoration: line-through;
+    
+}
+
+.days-remaining {
+    padding-left: 10px;
+    text-decoration: none;
+}
+
+.days-remaining.checked {
+    padding-left: 10px;
+    text-decoration: line-through;
+    
 }
 
 ul li:hover{
-    background-color: lightblue;
+    /*background-color: lightblue;*/
+    background: #fff;
+    box-shadow: 2px 2px 3px 2px #1abc9c;
+    color: #000;
 }
+
+li {
+    display: flex;
+
+}
+
+li .task {
+    position: fixed;
+    padding-left: 10px;
+}
+
+
+.days-remaining {
+    position: fixed;
+    margin-left: 410px;
+    padding-right: 10px;
+    
+}
+
 
 .li-task-date-div {
     text-align: right;
