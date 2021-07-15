@@ -96,9 +96,13 @@ ulEl.addEventListener('click', (element) => {
 
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
         let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
+        let taskDays = taskElement[taskElement.length-1];
+        console.log("taskstrrrr");
+        console.log(taskElement);
+        console.log(taskDays);
         
         for(let i = 0; i < tasksContainer.length; i++) {
-            if(tasksContainer[i].task == taskStr) {
+            if((tasksContainer[i].task == taskStr) && (tasksContainer[i].remaining_days == taskDays)) {
                 tasksContainer[i].clicks +=1;
                 if(tasksContainer[i].clicks % 2 != 0) {
                     tasksContainer[i].status = true;
@@ -140,8 +144,9 @@ ulEl.addEventListener("dblclick", (element) => {
                 //localStorage.removeItem(taskContainer[i]);
                 localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
             }
-        } renderTasks(tasksContainer);
-
+        } 
+        renderTasks(tasksContainer);
+        renderTaskStatus();
     }
 })
 
