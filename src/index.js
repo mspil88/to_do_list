@@ -10,6 +10,7 @@
  (9) fix line through on divs DONE
  (10) Theme toggle?
  (11) duplicate name potential delete issue - add num days into deletion DONE
+ (12) double click issue on delete - setTimeOut
 */ 
 
 
@@ -52,7 +53,8 @@ console.log(tasksContainer[0]);
 function createTask(task, date) {
     return {task: task,
             date: date,
-            status: false};
+            status: false,
+            sortKey: 0};
 }
 //update remaining days, generalise remainder to function
 
@@ -64,6 +66,7 @@ taskSubmit.addEventListener('click', () => {
     let taskObj = createTask(task, task_date);
 
     taskObj.remaining_days = Math.floor((taskObj.date - today)/(1000*60*60*24))+1;
+    taskObj.sorKey = taskObj.remaining_days;
     taskObj.clicks = 0;
 
     if(isNaN(taskObj.remaining_days)) {
@@ -82,14 +85,35 @@ taskSubmit.addEventListener('click', () => {
 
 sortBtn.addEventListener('click', () => {
     console.log("sort button clicked");
-    tasksContainer = tasksContainer.sort((a,b) => a.remaining_days - b.remaining_days);
+    tasksContainer = tasksContainer.sort((a,b) => a.sortKey - b.sortKey);
+    localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+    console.log(tasksContainer);
     renderTasks(tasksContainer);
     renderTaskStatus();
 })
 
 
+let clickCount = 0;
+const timeOut = 400;
 ulEl.addEventListener('click', (element) => {
+    clickCount ++;
+    if(clickCount === 1) {
+        singleClickTimer = setTimeout(function(){
+            clickCount = 0;
+            checkItem(element);
+        }, timeOut); }
+    else if (clickCount === 2) {
+        clearTimeout(singleClickTimer);
+        clickCount = 0;
+        deleteItem(element);
+    }
+}, false);
+    
+
+
+function checkItem(element) {
     console.log("clicked list element!");
+
     
     if((element.target.tagName == 'LI')) {
         element.target.classList.toggle('checked');
@@ -104,30 +128,44 @@ ulEl.addEventListener('click', (element) => {
         console.log(taskStr);
         console.log(taskDays);
 
+
         
         for(let i = 0; i < tasksContainer.length; i++) {
             if((tasksContainer[i].task == taskStr) && (tasksContainer[i].remaining_days == taskDays)) {
                 tasksContainer[i].clicks +=1;
                 console.log("match");
                 if(tasksContainer[i].clicks % 2 != 0) {
+                    
                     tasksContainer[i].status = true;
                     element.target.childNodes[1].classList.toggle('checked');
                     element.target.childNodes[3].classList.toggle('checked');
+                    tasksContainer[i].sortKey = 1000;
+
                 }
                 else {
                     tasksContainer[i].status = false;
                     element.target.childNodes[1].classList = 'task';
                     element.target.childNodes[3].classList = 'days-remaining';
+                    tasksContainer[i].sortKey = tasksContainer[i].remaining_days;
                 }
             }
-        } localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+        } 
+       
+        
+        
+        localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
     }
+
+    renderTasks(tasksContainer);
+    renderTaskStatus();
     console.log(tasksContainer);
     
-})
+}
 
-ulEl.addEventListener("dblclick", (element) => {
+
+function deleteItem(element)  {
     console.log("double check");
+
     //get indexof days, get everything before then trim
     if(element.target.tagName == "LI") {
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
@@ -137,9 +175,6 @@ ulEl.addEventListener("dblclick", (element) => {
             taskDays = '';
         }
         
-        console.log(taskElement);
-        console.log(`taskStr: ${taskStr}`);
-        console.log(taskDays);
         for(let i = 0; i < tasksContainer.length; i++){
             if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == taskDays) {
                 tasksContainer.splice(i, 1);
@@ -157,7 +192,7 @@ ulEl.addEventListener("dblclick", (element) => {
         renderTasks(tasksContainer);
         renderTaskStatus();
     }}}
-)
+
 
 function renderTasks(taskArray) {
     console.log("calling renderTasks()");
@@ -184,6 +219,7 @@ window.addEventListener('DOMContentLoaded', () => {
             tasksContainer[i].remaining_days = '';
         } else {
             tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
+            tasksContainer[i].sortKey = tasksContainer[i].remaining_days;    
         }
     }
 
