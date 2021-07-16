@@ -234,6 +234,20 @@ ul li.checked {
     
 }
 
+.days-remaining.overdue {
+    padding-left: 10px;
+    text-decoration: line-through;
+    color: red;
+}
+
+.days-remaining.plenty {
+    padding-left: 10px;
+    text-decoration: line-through;
+    color: green;    
+}
+
+
+
 ul li:hover{
     /*background-color: lightblue;*/
     background: #fff;
