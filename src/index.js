@@ -10,7 +10,8 @@
  (9) fix line through on divs DONE
  (10) Theme toggle?
  (11) duplicate name potential delete issue - add num days into deletion DONE
- (12) double click issue on delete - setTimeOut
+ (12) double click issue on delete - setTimeOut DONE
+ (13) Clean up code
 */ 
 
 
@@ -66,7 +67,7 @@ taskSubmit.addEventListener('click', () => {
     let taskObj = createTask(task, task_date);
 
     taskObj.remaining_days = Math.floor((taskObj.date - today)/(1000*60*60*24))+1;
-    taskObj.sorKey = taskObj.remaining_days;
+    taskObj.sortKey = taskObj.remaining_days;
     taskObj.clicks = 0;
 
     if(isNaN(taskObj.remaining_days)) {
@@ -217,6 +218,8 @@ window.addEventListener('DOMContentLoaded', () => {
     for(let i in tasksContainer) {
         if(tasksContainer[i].date == null) {
             tasksContainer[i].remaining_days = '';
+        } else if(tasksContainer[i].sortKey == 1000) {
+            tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;  
         } else {
             tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
             tasksContainer[i].sortKey = tasksContainer[i].remaining_days;    
@@ -228,6 +231,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
     // console.log(taskLi.childNodes[3].childNodes[3].classList);
     // console.log(taskLi.children);
+    console.log(tasksContainer);
     renderTaskStatus();
 
 }
