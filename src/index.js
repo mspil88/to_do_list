@@ -10,6 +10,7 @@
  (9) fix line through on divs DONE
  (10) Theme toggle?
  (11) duplicate name potential delete issue - add num days into deletion DONE
+ (12) moving to bottom 
 */ 
 
 
@@ -104,15 +105,20 @@ ulEl.addEventListener('click', (element) => {
         console.log(taskStr);
         console.log(taskDays);
 
+
         
         for(let i = 0; i < tasksContainer.length; i++) {
+            
             if((tasksContainer[i].task == taskStr) && (tasksContainer[i].remaining_days == taskDays)) {
                 tasksContainer[i].clicks +=1;
+                
                 console.log("match");
                 if(tasksContainer[i].clicks % 2 != 0) {
                     tasksContainer[i].status = true;
+                    // tasksContainer.push(tasksContainer.splice(i, 1)[0]);
                     element.target.childNodes[1].classList.toggle('checked');
                     element.target.childNodes[3].classList.toggle('checked');
+                    
                 }
                 else {
                     tasksContainer[i].status = false;
@@ -121,6 +127,7 @@ ulEl.addEventListener('click', (element) => {
                 }
             }
         } localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+        
     }
     console.log(tasksContainer);
     
@@ -178,6 +185,7 @@ function renderTasks(taskArray) {
 window.addEventListener('DOMContentLoaded', () => {
     console.log("DOM CONTENT LOADED");
     console.log(today);
+    console.log(tasksContainer);
 
     for(let i in tasksContainer) {
         if(tasksContainer[i].date == null) {
@@ -199,6 +207,7 @@ window.addEventListener('DOMContentLoaded', () => {
     
 function renderTaskStatus() {
     const taskLi = document.getElementById("ul-el");
+    const daysRemaining = document.getElementById("days-div");
     for(let i in tasksContainer) {
         if(tasksContainer[i].status == true) {
      
@@ -216,8 +225,9 @@ function renderTaskStatus() {
                  catch(e) {
                     console.log(e)
                  }
+         }
+
+        }
     }
 
-    }
-}
 }
