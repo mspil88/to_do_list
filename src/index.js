@@ -1,27 +1,21 @@
-/*TODOS:
- (1) sort list DONE
- (2) List deletion side effect DONE
- (3) persist to local storage SEEMS TO BE DONE
- (4) Tasks with more than one word, deletion does not work fix DONE
- (5) night theme DONE
- (6) improve li spacing, current solution very much a hack DONE
- (7) Update days remaining DONE
- (8) sort tasks unchecks if done, need to save status of task DONE
- (9) fix line through on divs DONE
- (10) Theme toggle?
- (11) duplicate name potential delete issue - add num days into deletion DONE
- (12) double click issue on delete - setTimeOut DONE
- (13) Clean up code
-*/ 
-
-
 const hamburgerBtn = document.getElementById("hamburger");
 const navList = document.getElementById("theme-list");
 let hamburgerClicks = -1;
-
-//const theme = document.getElementById("hamburger-content-sel");
 const theme = document.getElementById("hamburger");
+const taskSubmit = document.getElementById('task-submit'); 
+const today = new Date();
+const ulEl = document.getElementById("ul-el");
+const sortBtn = document.getElementById("sort-btn");
+let tasksContainer = [];
+let tasksFromLocal = JSON.parse(localStorage.getItem("myTasks"));
 
+//if tasks in local storage render them
+if(tasksFromLocal) {
+    tasksContainer = tasksFromLocal;
+    renderTasks(tasksContainer);
+}
+
+//event listenner to switch between day and night themes
 theme.addEventListener('click', () => {
     const body = document.querySelector("body");
     const logo = document.querySelector(".logo");
@@ -33,33 +27,17 @@ theme.addEventListener('click', () => {
         body.classList.toggle('night');
         logo.classList.toggle('night');        
     }
-
-    console.log(hamburgerClicks);
 })
 
-const taskSubmit = document.getElementById('task-submit'); 
-const today = new Date();
-const ulEl = document.getElementById("ul-el");
-const sortBtn = document.getElementById("sort-btn");
-let tasksContainer = [];
-let tasksFromLocal = JSON.parse(localStorage.getItem("myTasks"));
-
-if(tasksFromLocal) {
-    tasksContainer = tasksFromLocal;
-    renderTasks(tasksContainer);
-}
-
-console.log(tasksContainer[0]);
-
+//builds the task data structure
 function createTask(task, date) {
     return {task: task,
             date: date,
             status: false,
             sortKey: 0};
 }
-//update remaining days, generalise remainder to function
 
-
+//submits task if add task button clicked
 taskSubmit.addEventListener('click', () => {
     console.log("task submit clicked");
     let task = document.getElementById("task-input").value;
@@ -84,16 +62,16 @@ taskSubmit.addEventListener('click', () => {
     renderTasks(tasksContainer);
 })
 
+//sorts tasks based on remaining days, tasks marked as done get pushed to the bottom of the stack
 sortBtn.addEventListener('click', () => {
     console.log("sort button clicked");
     tasksContainer = tasksContainer.sort((a,b) => a.sortKey - b.sortKey);
     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-    console.log(tasksContainer);
     renderTasks(tasksContainer);
     renderTaskStatus();
 })
 
-
+//controls which event occurs when clicking on a dask, single click marks task as done, double click deletes
 let clickCount = 0;
 const timeOut = 400;
 ulEl.addEventListener('click', (element) => {
@@ -110,8 +88,7 @@ ulEl.addEventListener('click', (element) => {
     }
 }, false);
     
-
-
+//renders a task as 'done' by toggling the theme
 function checkItem(element) {
     console.log("clicked list element!");
 
@@ -159,15 +136,12 @@ function checkItem(element) {
 
     renderTasks(tasksContainer);
     renderTaskStatus();
-    console.log(tasksContainer);
-    
 }
 
-
+// deletes a task
 function deleteItem(element)  {
     console.log("double check");
 
-    //get indexof days, get everything before then trim
     if(element.target.tagName == "LI") {
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
         let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
@@ -180,21 +154,14 @@ function deleteItem(element)  {
             if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == taskDays) {
                 tasksContainer.splice(i, 1);
                 console.log(`taskcontainer ${tasksContainer.task}`);
-                //localStorage.removeItem(tasksFromLocal[i]);
+                
                 localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            // } else if ((tasksContainer[i].task == '') || (tasksContainer[i].remaining_days == taskDays)) {
-            //     tasksContainer.splice(i, 1);
-            //     console.log(`deleting ${tasksContainer[i].task}`);
-            //     //console.log(tasksContainer[i]);
-            //     //localStorage.removeItem(taskContainer[i]);
-            //     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            // }
         } 
         renderTasks(tasksContainer);
         renderTaskStatus();
     }}}
 
-
+//dynamically renders tasks on the page
 function renderTasks(taskArray) {
     console.log("calling renderTasks()");
 
@@ -211,6 +178,7 @@ function renderTasks(taskArray) {
     ulEl.innerHTML = listItems;
 }
 
+//renders tasks when the dom is loaded, also updates the remaining days function
 window.addEventListener('DOMContentLoaded', () => {
     console.log("DOM CONTENT LOADED");
     console.log(today);
@@ -227,10 +195,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-    //element.target.childNodes[3].classList.toggle('checked');
-    
-    // console.log(taskLi.childNodes[3].childNodes[3].classList);
-    // console.log(taskLi.children);
     console.log(tasksContainer);
     renderTaskStatus();
 
