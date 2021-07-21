@@ -247,15 +247,18 @@ li {
 }
 
 li .task {
-    position: fixed;
+    position: static;
     padding-left: 10px;
+    white-space: nowrap;
 }
 
 
 .days-remaining {
-    position: fixed;
-    margin-left: 410px;
+    position: absolute;
     padding-right: 10px;
+    margin-left: 400px;
+    white-space: nowrap;
+    
     
 }
 

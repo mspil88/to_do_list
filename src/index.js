@@ -1,25 +1,21 @@
-/*TODOS:
- (1) sort list DONE
- (2) List deletion side effect DONE
- (3) persist to local storage SEEMS TO BE DONE
- (4) Tasks with more than one word, deletion does not work fix DONE
- (5) night theme DONE
- (6) improve li spacing, current solution very much a hack DONE
- (7) Update days remaining DONE
- (8) sort tasks unchecks if done, need to save status of task DONE
- (9) fix line through on divs DONE
- (10) Theme toggle?
- (11) duplicate name potential delete issue - add num days into deletion DONE
-*/ 
-
-
 const hamburgerBtn = document.getElementById("hamburger");
 const navList = document.getElementById("theme-list");
 let hamburgerClicks = -1;
-
-//const theme = document.getElementById("hamburger-content-sel");
 const theme = document.getElementById("hamburger");
+const taskSubmit = document.getElementById('task-submit'); 
+const today = new Date();
+const ulEl = document.getElementById("ul-el");
+const sortBtn = document.getElementById("sort-btn");
+let tasksContainer = [];
+let tasksFromLocal = JSON.parse(localStorage.getItem("myTasks"));
 
+//if tasks in local storage render them
+if(tasksFromLocal) {
+    tasksContainer = tasksFromLocal;
+    renderTasks(tasksContainer);
+}
+
+//event listenner to switch between day and night themes
 theme.addEventListener('click', () => {
     const body = document.querySelector("body");
     const logo = document.querySelector(".logo");
@@ -31,32 +27,17 @@ theme.addEventListener('click', () => {
         body.classList.toggle('night');
         logo.classList.toggle('night');        
     }
-
-    console.log(hamburgerClicks);
 })
 
-const taskSubmit = document.getElementById('task-submit'); 
-const today = new Date();
-const ulEl = document.getElementById("ul-el");
-const sortBtn = document.getElementById("sort-btn");
-let tasksContainer = [];
-let tasksFromLocal = JSON.parse(localStorage.getItem("myTasks"));
-
-if(tasksFromLocal) {
-    tasksContainer = tasksFromLocal;
-    renderTasks(tasksContainer);
-}
-
-console.log(tasksContainer[0]);
-
+//builds the task data structure
 function createTask(task, date) {
     return {task: task,
             date: date,
-            status: false};
+            status: false,
+            sortKey: 0};
 }
-//update remaining days, generalise remainder to function
 
-
+//submits task if add task button clicked
 taskSubmit.addEventListener('click', () => {
     console.log("task submit clicked");
     let task = document.getElementById("task-input").value;
@@ -64,6 +45,7 @@ taskSubmit.addEventListener('click', () => {
     let taskObj = createTask(task, task_date);
 
     taskObj.remaining_days = Math.floor((taskObj.date - today)/(1000*60*60*24))+1;
+    taskObj.sortKey = taskObj.remaining_days;
     taskObj.clicks = 0;
 
     if(isNaN(taskObj.remaining_days)) {
@@ -80,16 +62,36 @@ taskSubmit.addEventListener('click', () => {
     renderTasks(tasksContainer);
 })
 
+//sorts tasks based on remaining days, tasks marked as done get pushed to the bottom of the stack
 sortBtn.addEventListener('click', () => {
     console.log("sort button clicked");
-    tasksContainer = tasksContainer.sort((a,b) => a.remaining_days - b.remaining_days);
+    tasksContainer = tasksContainer.sort((a,b) => a.sortKey - b.sortKey);
+    localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
     renderTasks(tasksContainer);
     renderTaskStatus();
 })
 
-
+//controls which event occurs when clicking on a dask, single click marks task as done, double click deletes
+let clickCount = 0;
+const timeOut = 400;
 ulEl.addEventListener('click', (element) => {
+    clickCount ++;
+    if(clickCount === 1) {
+        singleClickTimer = setTimeout(function(){
+            clickCount = 0;
+            checkItem(element);
+        }, timeOut); }
+    else if (clickCount === 2) {
+        clearTimeout(singleClickTimer);
+        clickCount = 0;
+        deleteItem(element);
+    }
+}, false);
+    
+//renders a task as 'done' by toggling the theme
+function checkItem(element) {
     console.log("clicked list element!");
+
     
     if((element.target.tagName == 'LI')) {
         element.target.classList.toggle('checked');
@@ -104,31 +106,42 @@ ulEl.addEventListener('click', (element) => {
         console.log(taskStr);
         console.log(taskDays);
 
+
         
         for(let i = 0; i < tasksContainer.length; i++) {
             if((tasksContainer[i].task == taskStr) && (tasksContainer[i].remaining_days == taskDays)) {
                 tasksContainer[i].clicks +=1;
                 console.log("match");
                 if(tasksContainer[i].clicks % 2 != 0) {
+                    
                     tasksContainer[i].status = true;
                     element.target.childNodes[1].classList.toggle('checked');
                     element.target.childNodes[3].classList.toggle('checked');
+                    tasksContainer[i].sortKey = 1000;
+
                 }
                 else {
                     tasksContainer[i].status = false;
                     element.target.childNodes[1].classList = 'task';
                     element.target.childNodes[3].classList = 'days-remaining';
+                    tasksContainer[i].sortKey = tasksContainer[i].remaining_days;
                 }
             }
-        } localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
+        } 
+       
+        
+        
+        localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
     }
-    console.log(tasksContainer);
-    
-})
 
-ulEl.addEventListener("dblclick", (element) => {
+    renderTasks(tasksContainer);
+    renderTaskStatus();
+}
+
+// deletes a task
+function deleteItem(element)  {
     console.log("double check");
-    //get indexof days, get everything before then trim
+
     if(element.target.tagName == "LI") {
         let taskElement = element.target.innerText.replace("\n", "").replace("Days", "").replace("Remaining: ", "").split(' ');
         let taskStr = taskElement.slice(0, taskElement.length-1).join(" ");
@@ -137,28 +150,18 @@ ulEl.addEventListener("dblclick", (element) => {
             taskDays = '';
         }
         
-        console.log(taskElement);
-        console.log(`taskStr: ${taskStr}`);
-        console.log(taskDays);
         for(let i = 0; i < tasksContainer.length; i++){
             if((tasksContainer[i].task == taskStr) && tasksContainer[i].remaining_days == taskDays) {
                 tasksContainer.splice(i, 1);
                 console.log(`taskcontainer ${tasksContainer.task}`);
-                //localStorage.removeItem(tasksFromLocal[i]);
+                
                 localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            // } else if ((tasksContainer[i].task == '') || (tasksContainer[i].remaining_days == taskDays)) {
-            //     tasksContainer.splice(i, 1);
-            //     console.log(`deleting ${tasksContainer[i].task}`);
-            //     //console.log(tasksContainer[i]);
-            //     //localStorage.removeItem(taskContainer[i]);
-            //     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-            // }
         } 
         renderTasks(tasksContainer);
         renderTaskStatus();
     }}}
-)
 
+//dynamically renders tasks on the page
 function renderTasks(taskArray) {
     console.log("calling renderTasks()");
 
@@ -175,6 +178,7 @@ function renderTasks(taskArray) {
     ulEl.innerHTML = listItems;
 }
 
+//renders tasks when the dom is loaded, also updates the remaining days function
 window.addEventListener('DOMContentLoaded', () => {
     console.log("DOM CONTENT LOADED");
     console.log(today);
@@ -182,16 +186,16 @@ window.addEventListener('DOMContentLoaded', () => {
     for(let i in tasksContainer) {
         if(tasksContainer[i].date == null) {
             tasksContainer[i].remaining_days = '';
+        } else if(tasksContainer[i].sortKey == 1000) {
+            tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;  
         } else {
             tasksContainer[i].remaining_days = Math.floor((Date.parse(tasksContainer[i].date) - today)/(1000*60*60*24))+1;
+            tasksContainer[i].sortKey = tasksContainer[i].remaining_days;    
         }
     }
 
     localStorage.setItem("myTasks", JSON.stringify(tasksContainer));
-    //element.target.childNodes[3].classList.toggle('checked');
-    
-    // console.log(taskLi.childNodes[3].childNodes[3].classList);
-    // console.log(taskLi.children);
+    console.log(tasksContainer);
     renderTaskStatus();
 
 }
